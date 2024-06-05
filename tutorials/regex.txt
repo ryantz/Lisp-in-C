@@ -1,0 +1,21 @@
+regex:
+
+. -> Any character is required
+
+a -> Character a is required
+
+[abcdef] -> Any character in the set of abcdef is required
+
+[a-f] -> Any character in the range a-f is required
+
+a? -> Character a is optional
+
+a* -> 0 or more of character a is required
+
+a+ -> 1 or more of the character a is required
+
+^ -> start of input
+
+$ -> end of input
+
+regex written by writing them in between //
