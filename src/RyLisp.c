@@ -43,6 +43,7 @@ int number_of_nodes(mpc_ast_t* t){
     }return 0;
 }
 
+/*
 long eval_operation(long x, char* oper, long y){
     //string compare
     if(strcmp(oper, "+")==0){
@@ -80,7 +81,76 @@ long eval(mpc_ast_t* t){
         i++;
     }return x;
 }
+*/
 
+//error handling
+//to establish if it is an error or not
+typedef struct{
+    int type;
+    long num;
+    int err;
+}lval; //lval, lisp value
+
+//enumerations for types and errors
+enum{ LVAL_NUM, LVAL_ERR }; //either a number or an error
+enum{ LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM }; // divide by 0, unknown operator, number too large for long
+
+lval lval_num(long x){
+    lval v;
+    v.type = LVAL_NUM;
+    v.num = x;
+    return v;
+}
+
+lval lval_err(int x){
+    lval v;
+    v.type = LVAL_ERR;
+    v.err = x;
+    return v;
+}
+
+//printing errors
+void lval_print(lval v){
+    switch(v.type){
+        case LVAL_NUM: printf("%li", v.num); break;
+        case LVAL_ERR:
+            if(v.err == LERR_DIV_ZERO){
+                printf("Error: Divison By Zero!");
+            }
+            if(v.err == LERR_BAD_OP){
+                printf("Error: Invalid Operator!");
+            }
+            if(v.err == LERR_BAD_NUM){
+                printf("Error: Invalid Number!");
+            }break;
+    }
+}
+
+void lval_println(lval v){
+    lval_print(v);
+    putchar('\n'); //just a function to do lval_print and start new line
+}
+
+//evaluating added with errors and using lval
+lval eval_operation(lval x, char* operator, lval y){
+    if(x.type == LVAL_ERR){return x;}
+    if(y.type == LVAL_ERR){return y;}
+
+    if(strcmp(operator, "+") == 0){
+        return lval_num(x.num + y.num);
+    }
+    if(strcmp(operator, "*") == 0){
+        return lval_num(x.num * y.num);
+    }
+    if(strcmp(operator, "-") == 0){
+        return lval_num(x.num - y.num);
+    }
+    if(strcmp(operator, "/") == 0){
+        return y.num == 0 ? lval_err(LERR_DIV_ZERO) : lval_num(x.num/y.num);
+    }return lval_err(LERR_BAD_OP);
+}
+
+//TODO lval eval
 
 int main(int argc, char** argv){
 
