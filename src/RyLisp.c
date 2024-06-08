@@ -150,7 +150,24 @@ lval eval_operation(lval x, char* operator, lval y){
     }return lval_err(LERR_BAD_OP);
 }
 
-//TODO lval eval
+lval eval(mpc_ast_t* t){
+    if(strstr(t->tag, "number")){
+        //checking if there is error when converting
+        errno = 0;
+        //strtol converting string to long (str, endptr, base)
+        long x = strtol(t->contents, NULL, 10);
+        //ERANGE  represents range error
+        return errno != ERANGE ? lval_num(x) : lval_err(LERR_BAD_NUM);
+    }
+    char* operator = t->children[1]->contents;
+    lval x = eval(t->children[2]);
+
+    int i = 3;
+    while(strstr(t->children[i]->tag, "expression")){
+        x = eval_operation(x, operator, eval(t->children[i]));
+        i++;
+    }return x;
+}
 
 int main(int argc, char** argv){
 
@@ -182,8 +199,11 @@ int main(int argc, char** argv){
         if(mpc_parse("<stdin>", input, Polish, &r)){
             mpc_ast_print(r.output);
 
-            long result = eval(r.output);
-            printf("%li\n", result);
+            //long result = eval(r.output);
+            //printf("%li\n", result);
+
+            lval result = eval(r.output);
+            lval_println(result);
 
             /*
             //loading AST from output (Abstract Syntax Tree)
