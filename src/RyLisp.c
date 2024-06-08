@@ -85,16 +85,25 @@ long eval(mpc_ast_t* t){
 
 //error handling
 //to establish if it is an error or not
-typedef struct{
+//adding new params for Sexpr
+typedef struct lval{
     int type;
     long num;
-    int err;
+    //int err;
+    //Error and symbol types have string data now
+    char* err;
+    char* sym;
+    //count and pointer to a list of lval*, points to other individual lval
+    int count;
+    struct lval** cell;
 }lval; //lval, lisp value
 
 //enumerations for types and errors
-enum{ LVAL_NUM, LVAL_ERR }; //either a number or an error
-enum{ LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM }; // divide by 0, unknown operator, number too large for long
+//added new lval types for S-expressions symbols (+-*/) and sexpression
+enum{ LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_SEXPR }; //either a number or an error
+//enum{ LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM }; // divide by 0, unknown operator, number too large for long
 
+/*
 lval lval_num(long x){
     lval v;
     v.type = LVAL_NUM;
@@ -108,6 +117,10 @@ lval lval_err(int x){
     v.err = x;
     return v;
 }
+
+*/
+
+//TODO CONSTRUCTORS AND DESTRUCTORS
 
 //printing errors
 void lval_print(lval v){
@@ -171,6 +184,7 @@ lval eval(mpc_ast_t* t){
 
 int main(int argc, char** argv){
 
+/*
 //parsing, take in input, translate into something machine can understand
     mpc_parser_t* Number = mpc_new("number");
     mpc_parser_t* Operator = mpc_new("operator");
@@ -185,6 +199,23 @@ int main(int argc, char** argv){
             polish: /^/ <operator> <expression>+ /$/ ; \
         ", 
         Number, Operator, Expression, Polish);
+*/
+
+//S-expression
+    mpc_parser_t* Number = mpc_new("number");
+    mpc_parser_t* Symbol = mpc_new("symbol");
+    mpc_parser_t* Sexpr = mpc_new("sexpr");
+    mpc_parser_t* Expr = mpc_new("expr");
+    mpc_parser_t* Lispy = mpc_new("lispy");
+
+    mpca_lang(MPCA_LANG_DEFAULT,
+        "\
+            number: /-?[0-9]+/; \
+            symbol: '+' | '-' | '*' | '/' |; \
+            sexpr: '(' <expr>* ')' ; \
+            expr: <number> | <symbol> | <sexpr>; \
+            lispy: /^/ <expr>* /$/; \
+        ", Number, Symbol, Sexpr, Expr, Lispy);
 
     puts("RyanHasALisp Version 0.0.0.0.2");
     puts("To exit program please press Ctrl+c :)");
@@ -226,7 +257,7 @@ int main(int argc, char** argv){
         free(input);
         
     }
-    mpc_cleanup(4, Number, Operator, Expression, Polish);
+    mpc_cleanup(4, Number, Symbol, Sexpr, Expr, Lispy);
     return 0;
 
     //gcc -std=c99 -Wall parsing.c -ledit -o parse
