@@ -1,0 +1,15 @@
+Lisp: Family of programming languages whose computation is represented by lists.
+
+Author designed it for minimalism, simplicity and clarity
+
+C strings are represented by pointer type char*, stored as a list of characters.
+
+end of strings contain \0 flag so all strings length are length + 1.
+
+Interactive prompt: program that prompts the user for some input and replies back with a message.(REPL)
+
+REPL: Read Evaluate Print Loop.
+
+#include <editline/readline.h> : read input from some prompt while allowing editing of the input
+#include <editline/history.h> : records the history of inputs so they can be retrieved by using arrow keys
+these are used in lisp for using arrow keys for UNIX systems.
